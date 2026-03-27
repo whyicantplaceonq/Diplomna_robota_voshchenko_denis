@@ -1,2 +1,49 @@
 #!/bin/sh
-echo "Pre-commit hook is running..."
+# .githooks/pre-commit
+# Pre-commit хук для статичного аналізу Verse коду
+#
+# Активація:
+#   cp .githooks/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+
+echo ""
+echo "================================================"
+echo "  Pre-commit: Verse Static Analysis"
+echo "================================================"
+
+# Перевіряємо чи є Python
+if ! command -v python3 &> /dev/null; then
+    echo "⚠ Python3 не знайдено — аналіз пропущено"
+    exit 0
+fi
+
+# Перевіряємо чи є Verse файли у staged змінах
+VERSE_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.verse$' | grep -v '\.digest\.verse$')
+
+if [ -z "$VERSE_FILES" ]; then
+    echo "ℹ Verse файлів у коміті немає — аналіз пропущено"
+    echo "================================================"
+    echo ""
+    exit 0
+fi
+
+echo "Знайдено Verse файлів: $(echo "$VERSE_FILES" | wc -l)"
+echo ""
+
+# Запускаємо аналіз
+python3 scripts/verse_lint.py Verse/
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "✗ Статичний аналіз виявив ПОМИЛКИ."
+    echo "  Виправте помилки та повторіть git commit."
+    echo "  Щоб пропустити перевірку: git commit --no-verify"
+    echo "================================================"
+    echo ""
+    exit 1
+fi
+
+echo "================================================"
+echo ""
+exit 0
