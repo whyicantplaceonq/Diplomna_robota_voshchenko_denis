@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://whyicantplaceonq.github.io/Diplomna_robota_voshchenko_denis/sitemap.xml
