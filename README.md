@@ -5,54 +5,141 @@
 
 ## 📖 Опис проекту
 
-**Tycoon Simulator** — це ігровий острів для платформи Fortnite, реалізований засобами UEFN. Гравець керує власним бізнесом: збирає ресурси, будує споруди, наймає працівників та розвиває свою імперію, збільшуючи прибуток.
+**Tycoon Simulator** — ігровий острів для Fortnite Creative 2.0. Гравець розвиває бізнес: розблоковує будівлі, витрачає внутрішню валюту та розширює свою економічну імперію.
 
-Проект демонструє можливості мови програмування **Verse** для реалізації ігрової логіки, економічних систем та інтерактивних механік у середовищі Fortnite Creative 2.0.
+---
 
-## 🎮 Основні механіки
+## 🚀 Швидкий старт для розробника
 
-- Система збору ресурсів та виробництва
-- Економічна модель з валютою та прибутком
-- Будівництво та апгрейд споруд
-- Прогресія гравця (рівні, досягнення)
-- Інтерактивний UI (HUD з балансом, таймерами)
+> Передбачається свіжа ОС (Windows 10/11). Усі кроки — з нуля.
+
+### Крок 1 — Встановлення Epic Games Launcher
+
+1. Перейдіть на [epicgames.com/store](https://store.epicgames.com)
+2. Завантажте та встановіть **Epic Games Launcher**
+3. Створіть або увійдіть в Epic Games акаунт
+4. У Launcher → вкладка **Fortnite** → встановіть Fortnite
+
+### Крок 2 — Встановлення UEFN
+
+1. У Epic Games Launcher → вкладка **Unreal Editor for Fortnite**
+2. Натисніть **Install** (розмір ~20 GB)
+3. Дочекайтесь завершення встановлення
+
+### Крок 3 — Встановлення Git
+
+```bash
+# Завантажте з https://git-scm.com
+# Або через winget:
+winget install Git.Git
+```
+
+### Крок 4 — Клонування репозиторію
+
+```bash
+git clone https://github.com/whyicantplaceonq/Diplomna_robota_voshchenko_denis.git
+cd Diplomna_robota_voshchenko_denis
+```
+
+### Крок 5 — Відкриття проекту в UEFN
+
+1. Запустіть **Unreal Editor for Fortnite**
+2. У вікні запуску натисніть **Open Existing Project**
+3. Оберіть папку склонованого репозиторію
+4. Дочекайтесь завантаження проекту та компіляції Verse
+
+### Крок 6 — Запуск у режимі розробки
+
+```
+UEFN Menu → Launch Session (або Ctrl+F8)
+```
+
+Fortnite запуститься з вашим островом у режимі тестування.
+
+### Крок 7 — Перевірка Verse коду
+
+```
+UEFN Menu → Verse → Build Verse Code (Ctrl+Shift+B)
+```
+
+Якщо компіляція успішна — проект готовий до роботи.
+
+---
 
 ## 🗂️ Структура репозиторію
 
 ```
 /
-├── Meshes/                    # 3D моделі об'єктів тайкуну
-├── unlockables_device.verse   # Логіка розблокування будівель/предметів
-├── .gitignore                 # Виключає автогенеровані файли UEFN
-├── README.md                  # Цей файл
-└── LICENSE                    # Ліцензія MIT
+├── Verse/
+│   └── unlockables_device.verse   # Логіка розблокування будівель
+├── Content/
+│   └── Maps/                      # Мапи острова
+├── scripts/
+│   ├── verse_lint.py              # Статичний аналізатор коду
+│   └── verse_doc.py               # Генератор документації
+├── docs/
+│   ├── deployment.md              # Інструкція публікації острова
+│   ├── update.md                  # Інструкція оновлення
+│   ├── generate_docs.md           # Генерація документації
+│   ├── linting.md                 # Документація лінтера
+│   └── generated/                 # Згенерована HTML-документація
+├── .githooks/
+│   └── pre-commit                 # Git хук для статичного аналізу
+├── .gitignore
+├── README.md
+└── LICENSE
 ```
 
-## 🛠️ Технології
+---
 
-| Технологія | Призначення |
+## 🛠️ Базові команди
+
+| Дія | Команда / Дія в UEFN |
 |---|---|
-| UEFN (Unreal Editor for Fortnite) | Середовище розробки |
-| Verse | Мова програмування ігрової логіки |
-| Fortnite Creative 2.0 | Платформа публікації |
+| Запуск тестування | UEFN → Launch Session (Ctrl+F8) |
+| Компіляція Verse | UEFN → Verse → Build Verse Code (Ctrl+Shift+B) |
+| Статичний аналіз | `python scripts/verse_lint.py Verse/` |
+| Генерація документації | `python scripts/verse_doc.py Verse/ -o docs/generated/` |
+| Публікація острова | UEFN → Island → Publish to Fortnite |
 
-## 🚀 Запуск проекту
+---
 
-1. Встановіть [UEFN](https://dev.epicgames.com/documentation/en-us/uefn/unreal-editor-for-fortnite-documentation) через Epic Games Launcher
-2. Клонуйте репозиторій:
-   ```bash
-   git clone https://github.com/whyicantplaceonq/Diplomna_robota_voshchenko_denis.git
-   ```
-3. Відкрийте проект у UEFN
-4. Натисніть **Launch Session** для тестування
+## 📝 Документування коду
+
+Використовуємо формат **Verse Doc Comments** (`## ... ##`):
+
+```verse
+##
+# @func MyFunction
+# @brief Що робить функція.
+# @param AgentArg  Опис параметра
+##
+MyFunction(AgentArg : agent) : void = ...
+```
+
+Детальніше → [docs/generate_docs.md](docs/generate_docs.md)
+
+---
+
+## 🔍 Статичний аналіз (лінтинг)
+
+```bash
+# Активація pre-commit хука
+cp .githooks/pre-commit .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+
+# Ручний запуск
+python scripts/verse_lint.py Verse/
+```
+
+Детальніше → [docs/linting.md](docs/linting.md)
+
+---
 
 ## 👤 Автор
 
-**Вощенко Денис**  
-Студент групи ін-22  
-СУмський державний університет 
-2026
+**Вощенко Денис** · [GitHub](https://github.com/whyicantplaceonq)
 
 ## 📄 Ліцензія
 
-Цей проект розповсюджується під ліцензією MIT. Детальніше — у файлі [LICENSE](LICENSE).
+MIT License — детальніше у файлі [LICENSE](LICENSE)
