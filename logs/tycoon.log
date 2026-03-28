@@ -1,0 +1,15 @@
+2026-03-28 06:55:44 | INFO     | root                      | Logging initialized | level=INFO | file=/home/claude/lab9/logs/tycoon.log
+2026-03-28 06:55:44 | INFO     | unlockables_device        | [SESSION-A077297C] DEVICE_INIT | purchases_count=5 | move_distance=1500.0 | status=OK
+2026-03-28 06:55:44 | INFO     | unlockables_device        | [SESSION-A077297C] PLAYER_JOINED | player=player_ABC123
+2026-03-28 06:55:44 | DEBUG    | unlockables_device        | [SESSION-A077297C] PURCHASE_ATTEMPT | player=player_ABC123 | item=Workshop | price=100 | gold=500 | can_afford=True
+2026-03-28 06:55:44 | INFO     | unlockables_device        | [SESSION-A077297C] PURCHASE_SUCCESS | player=player_ABC123 | item=Workshop | price=100 | remaining_gold=400 | index=0
+2026-03-28 06:55:44 | DEBUG    | unlockables_device        | [SESSION-A077297C] PURCHASE_ATTEMPT | player=player_ABC123 | item=Factory | price=600 | gold=400 | can_afford=False
+2026-03-28 06:55:44 | ERROR    | unlockables_device        | [SESSION-A077297C] [ERR-20260328065544-C92470] PURCHASE_FAILED | player=player_ABC123 | item=Factory | required=600 | available=400 | deficit=200
+2026-03-28 06:55:44 | ERROR    | unlockables_device        | [SESSION-A077297C] [ERR-20260328065544-385D5D] WRONG_OWNER | requester=player_XYZ999 | owner=player_ABC123 | action=blocked
+2026-03-28 06:55:44 | WARNING  | unlockables_device        | [SESSION-A077297C] TRIGGER_BLOCKED | reason=cooldown | duration=1.0s
+2026-03-28 06:55:44 | INFO     | unlockables_device        | [SESSION-A077297C] PLAYER_LEFT | player=player_ABC123 | purchases_made=1 | state=reset
+2026-03-28 06:55:44 | CRITICAL | unlockables_device        | [SESSION-A077297C] [ERR-20260328065544-3F05D7] ISLAND_CONFIG_ERROR | purchases=0
+Traceback (most recent call last):
+  File "/home/claude/lab9/scripts/verse_logger.py", line 333, in demo
+    raise RuntimeError("purchase_datas array is empty — island misconfigured")
+RuntimeError: purchase_datas array is empty — island misconfigured
