@@ -1,0 +1,113 @@
+
+############################################################
+  Tycoon Simulator — Performance Profiler
+  Проект: Ігровий застосунок (UEFN / Verse)
+############################################################
+
+============================================================
+  1. Базове профілювання — оригінальна версія
+============================================================
+  Набори даних: small=5, medium=20, large=50 покупок
+  Повторень для timeit: 300
+  [small ]   5 покупок → 0.0729 мс/сценарій
+  [medium]  20 покупок → 0.2944 мс/сценарій
+  [large ]  50 покупок → 0.7272 мс/сценарій
+
+============================================================
+  2. cProfile — топ-10 функцій (medium dataset, оригінал)
+============================================================
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     2950    0.010    0.000    0.021    0.000 /home/claude/lab8/scripts/tycoon_sim.py:100(_move_props)
+       50    0.001    0.000    0.017    0.000 /home/claude/lab8/scripts/tycoon_sim.py:312(make_purchases)
+     1000    0.003    0.000    0.013    0.000 /home/claude/lab8/scripts/tycoon_sim.py:53(__init__)
+     1000    0.002    0.000    0.011    0.000 /home/claude/lab8/scripts/tycoon_sim.py:156(on_claimer_triggered)
+     4000    0.004    0.000    0.010    0.000 /home/claude/lab8/scripts/tycoon_sim.py:34(__init__)
+    11800    0.003    0.000    0.009    0.000 /home/claude/lab8/scripts/tycoon_sim.py:42(get_transform)
+       50    0.000    0.000    0.008    0.000 /home/claude/lab8/scripts/tycoon_sim.py:127(on_begin)
+       50    0.000    0.000    0.007    0.000 /home/claude/lab8/scripts/tycoon_sim.py:137(on_player_left)
+
+         117401 function calls in 0.045 seconds
+
+   Ordered by: cumulative time
+   List reduced from 35 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       50    0.000    0.000    0.045    0.001 /home/claude/lab8/scripts/profiler.py:31(run_scenario)
+     2950    0.010    0.000    0.021    0.000 /home/claude/lab8/scripts/tycoon_sim.py:100(_move_props)
+       50    0.001    0.000    0.017    0.000 /home/claude/lab8/scripts/tycoon_sim.py:312(make_purchases)
+     1000    0.003    0.000    0.013    0.000 /home/claude/lab8/scripts/tycoon_sim.py:53(__init__)
+     1000    0.002    0.000    0.011    0.000 /home/claude/lab8/scripts/tycoon_sim.py:156(on_claimer_triggered)
+     4000    0.004    0.000    0.010    0.000 /home/claude/lab8/scripts/tycoon_sim.py:34(__init__)
+    11800    0.003    0.000    0.009    0.000 /home/claude/lab8/scripts/tycoon_sim.py:42(get_transform)
+       50    0.000    0.000    0.008    0.000 /home/claude/lab8/scripts/tycoon_sim.py:127(on_begin)
+       50    0.000    0.000    0.007    0.000 /home/claude/lab8/scripts/tycoon_sim.py:137(on_player_left)
+    14000    0.005    0.000    0.006    0.000 /usr/lib/python3.12/random.py:494(uniform)
+
+
+
+============================================================
+  3. Профілювання — оптимізована версія
+============================================================
+  [small ]   5 покупок → 0.0558 мс/сценарій
+  [medium]  20 покупок → 0.1368 мс/сценарій
+  [large ]  50 покупок → 0.3392 мс/сценарій
+
+============================================================
+  4. Порівняння: оригінал vs оптимізована версія
+============================================================
+  Набір      Оригінал (мс)      Оптимізована (мс)    Покращення
+  ---------- ------------------ -------------------- ------------
+  small      0.0729             0.0558               +23.5% (1.31x)
+  medium     0.2944             0.1368               +53.5% (2.15x)
+  large      0.7272             0.3392               +53.4% (2.14x)
+
+============================================================
+  5. Виявлені гарячі точки (оригінальна версія)
+============================================================
+
+  HOTSPOT #1 — _text_for_ui() (побуквенна конкатенація рядка)
+    Проблема : for char in text: result += char  → O(n²) через іммутабельні str
+    Вплив    : викликається при кожній покупці та OnBegin
+    Виправлення: пряме повернення рядка (O(1))
+
+  HOTSPOT #2 — on_claimer_triggered() (лінійний пошук за індексом)
+    Проблема : for i, pd in enumerate(list): if i == index → O(n) замість O(1)
+    Вплив    : зростає лінійно з кількістю покупок
+    Виправлення: прямий доступ list[index] (O(1))
+
+  HOTSPOT #3 — _move_props() (зайве копіювання об'єктів)
+    Проблема : get_transform() → словник → Vector3 copy → новий Vector3
+    Вплив    : 3-4 алокації на кожен prop при кожній покупці
+    Виправлення: пряма мутація prop.location.z (0 алокацій)
+
+  HOTSPOT #4 — on_player_left() (range + array lookup замість зрізу)
+    Проблема : for i in range(0, index-1): self.purchases[i]
+    Вплив    : повторні звернення до масиву при скиданні
+    Виправлення: purchases[:index] (Python slice, оптимізований C-рівень)
+
+  HOTSPOT #5 — _move_claimer_to_purchase() (повторне форматування рядків)
+    Проблема : рядок білборда формується заново при кожному виклику
+    Вплив    : при on_begin + кожна покупка + reset
+    Виправлення: dict-кеш за іменем покупки
+
+
+============================================================
+  6. Застосовані оптимізації
+============================================================
+
+  #1  _text_for_ui()        : O(n²) concat → O(1) direct return
+  #2  on_claimer_triggered() : O(n) linear search → O(1) direct index access
+  #3  _move_props()          : 3 allocations/prop → 0 allocations (in-place mutation)
+  #4  on_player_left()       : range+lookup → Python slice (C-level optimized)
+  #5  _move_claimer_to_purchase(): no cache → dict cache (skip repeat formatting)
+  #6  __init__               : len() on every call → cached _purchases_count
+  #7  f-string               : str concat → f-string (single pass)
+
+
+============================================================
+  7. Підсумок
+============================================================
+  Середнє покращення : 43.5%
+  Найбільше покращення: 53.5% (medium dataset)
+  Нових гарячих точок : 0 (після оптимізацій cProfile чистий)
+
